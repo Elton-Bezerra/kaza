@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Local planning, drafts, and resume state
+.kaza-work/

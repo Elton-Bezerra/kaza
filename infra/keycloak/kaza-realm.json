@@ -1,0 +1,45 @@
+{
+  "realm": "kaza",
+  "enabled": true,
+  "registrationAllowed": false,
+  "roles": {
+    "realm": [
+      {
+        "name": "SUPER_ADMIN",
+        "description": "Platform administrator"
+      },
+      {
+        "name": "SINDICO",
+        "description": "Condominium administrator"
+      },
+      {
+        "name": "MORADOR",
+        "description": "Condominium resident"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "kaza-web",
+      "name": "Kaza Web",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "redirectUris": [
+        "http://localhost:3000/*",
+        "http://localhost:5173/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3000",
+        "http://localhost:5173"
+      ]
+    }
+  ]
+}

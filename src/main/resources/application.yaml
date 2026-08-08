@@ -1,3 +1,23 @@
 spring:
   application:
     name: kaza
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/mydatabase}
+    username: ${DATABASE_USERNAME:myuser}
+    password: ${DATABASE_PASSWORD:secret}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8081/realms/kaza}
+
+asaas:
+  base-url: ${ASAAS_BASE_URL:https://sandbox.asaas.com/api/v3}
+  api-key: ${ASAAS_API_KEY:}
+  webhook-token: ${ASAAS_WEBHOOK_TOKEN:}
