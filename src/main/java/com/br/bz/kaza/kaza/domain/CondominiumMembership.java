@@ -24,4 +24,6 @@ public class CondominiumMembership {
     @PreUpdate void onUpdate() { updatedAt = OffsetDateTime.now(); }
     public MembershipRole getRole() { return role; }
     public boolean isActive() { return active; }
+    public User getUser() { return user; }
+    public Condominium getCondominium() { return condominium; }
 }

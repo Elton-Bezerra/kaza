@@ -11,13 +11,96 @@ spring:
       ddl-auto: validate
   flyway:
     enabled: true
+  session:
+    store-type: jdbc
+    jdbc:
+      initialize-schema: never
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 11MB
+  mail:
+    host: ${SPRING_MAIL_HOST:localhost}
+    port: ${SPRING_MAIL_PORT:1025}
+    username: ${SPRING_MAIL_USERNAME:}
+    password: ${SPRING_MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${SPRING_MAIL_SMTP_AUTH:false}
+          starttls:
+            enable: ${SPRING_MAIL_SMTP_STARTTLS_ENABLE:false}
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
   security:
     oauth2:
       resourceserver:
         jwt:
           issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8081/realms/kaza}
 
+server:
+  servlet:
+    session:
+      timeout: ${KAZA_SESSION_TIMEOUT:30m}
+      cookie:
+        http-only: true
+        secure: ${KAZA_SESSION_COOKIE_SECURE:false}
+        same-site: lax
+
 asaas:
   base-url: ${ASAAS_BASE_URL:https://sandbox.asaas.com/api/v3}
   api-key: ${ASAAS_API_KEY:}
   webhook-token: ${ASAAS_WEBHOOK_TOKEN:}
+
+kaza:
+  admin:
+    auth:
+      issuer-uri: ${KAZA_ADMIN_OAUTH_ISSUER_URI:${KEYCLOAK_ISSUER_URI:http://localhost:8081/realms/kaza}}
+      client-id: ${KAZA_ADMIN_OAUTH_CLIENT_ID:kaza-admin-bff}
+      client-secret: ${KAZA_ADMIN_OAUTH_CLIENT_SECRET:kaza-admin-bff-local-secret}
+      redirect-uri: ${KAZA_ADMIN_OAUTH_REDIRECT_URI:http://localhost:3000/admin/auth/callback}
+      post-login-redirect-uri: ${KAZA_ADMIN_OAUTH_POST_LOGIN_REDIRECT_URI:http://localhost:3000/admin}
+      post-logout-redirect-uri: ${KAZA_ADMIN_OAUTH_POST_LOGOUT_REDIRECT_URI:http://localhost:3000/admin}
+      session-timeout: ${KAZA_ADMIN_SESSION_TIMEOUT:PT30M}
+      refresh-window: ${KAZA_ADMIN_SESSION_REFRESH_WINDOW:PT2M}
+      challenge-timeout: ${KAZA_ADMIN_CHALLENGE_TIMEOUT:PT5M}
+      allowed-origins: ${KAZA_ADMIN_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000,http://127.0.0.1:5173}
+  mail:
+    from: ${KAZA_MAIL_FROM:no-reply@kaza.local}
+    leads:
+      internal-recipient: ${KAZA_LEAD_INTERNAL_RECIPIENT:super-admin@kaza.local}
+      internal-subject: ${KAZA_LEAD_INTERNAL_SUBJECT:New lead received from {{name}}}
+      internal-body: |
+        New onboarding lead received.
+
+        Name: {{name}}
+        Email: {{email}}
+        Phone: {{phone}}
+        Role: {{role}}
+        Source: {{source}}
+        Landing path: {{landingPath}}
+        Created at: {{createdAt}}
+        Lead ID: {{id}}
+      prospect-subject: ${KAZA_PROSPECT_SUBJECT:We received your Kaza request}
+      prospect-body: |
+        Hi {{name}},
+
+        We received your Kaza onboarding request and our team will review it soon.
+
+        Email: {{email}}
+        Submitted at: {{createdAt}}
+        Request ID: {{id}}
+      invitation-subject: ${KAZA_INVITATION_SUBJECT:Your Kaza onboarding invitation}
+      invitation-body: |
+        Hi {{name}},
+
+        Your Kaza onboarding invitation is ready.
+
+        Start here: {{invitationUrl}}
+        This link expires at: {{expiresAt}}
+
+        If you were not expecting this email, you can ignore it.
+  web:
+    public-url: ${KAZA_WEB_PUBLIC_URL:http://localhost:3000}
+    allowed-origins: ${KAZA_WEB_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000,http://127.0.0.1:5173}

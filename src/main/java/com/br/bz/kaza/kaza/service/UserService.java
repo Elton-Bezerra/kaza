@@ -31,8 +31,19 @@ public class UserService {
 
     @Transactional
     public User ensureFromSubject(String subject, String displayName) {
+        return ensureFromIdentity(subject, null, displayName);
+    }
+
+    @Transactional
+    public User ensureFromIdentity(String subject, String email, String displayName) {
         if (subject == null || subject.isBlank()) return null;
         return users.findBySubject(subject)
-                .orElseGet(() -> users.save(new User(subject, null, displayName)));
+                .map(existing -> {
+                    if (!Objects.equals(existing.getEmail(), email) || !Objects.equals(existing.getDisplayName(), displayName)) {
+                        existing.refresh(email, displayName);
+                    }
+                    return existing;
+                })
+                .orElseGet(() -> users.save(new User(subject, email, displayName)));
     }
 }
