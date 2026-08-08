@@ -1,94 +1,55 @@
 # Authentication and authorization
 
-## User perspective
+Kaza keeps admin authentication server-side.
 
-Users sign in through Keycloak. Kaza does not manage passwords or issue its own access tokens. After sign-in, the client sends the Keycloak access token in every request:
+## Admin OAuth flow
 
-```http
-Authorization: ******
-```
+The frontend constructs the Keycloak authorize URL itself:
 
-The token must contain one of the configured realm roles:
+- `client_id`
+- `redirect_uri`
+- `state`
+- `nonce`
+- `code_challenge`
+- `code_challenge_method=S256`
 
-| Role | Purpose |
-| --- | --- |
-| `SUPER_ADMIN` | Platform-wide operations |
-| `SINDICO` | Manage a condominium, expenses, payment preferences, and billing |
-| `MORADOR` | Read permitted condominium information and charges |
+Before redirecting, the browser starts a short-lived server challenge transaction:
 
-## What happens
+1. `GET /api/v1/admin/auth/csrf`
+2. `POST /api/v1/admin/auth/challenge` with `state`, `nonce`, and `codeVerifier`
+3. redirect to Keycloak
+4. Keycloak returns to `GET /api/v1/admin/auth/callback`
+5. Java validates the stored challenge, exchanges the code with the confidential client secret plus PKCE verifier, validates issuer/audience/nonce/role, and creates the secure session
 
-Spring Security validates the token signature using Keycloak's issuer configuration. The application extracts the subject (`sub`) and roles, then provisions a local `User` record when that subject is first seen. Condominium-management operations verify an active `CondominiumMembership`, so the same person can belong to multiple condominiums with different roles.
+Tokens never leave the server-side session store.
 
-Membership is Kaza domain data: Keycloak authenticates the person, while Kaza decides which condominium context and role that person may use.
+## Admin routes
 
-After sign-in, the client should call a Kaza session/bootstrap endpoint such as:
+- `GET /api/v1/admin/auth/login` — convenience redirect flow for server-rendered/admin entry points
+- `GET /api/v1/admin/auth/csrf` — bootstrap CSRF token for browser POSTs
+- `POST /api/v1/admin/auth/challenge` — store a short-lived login transaction
+- `GET /api/v1/admin/auth/callback` — code exchange and session creation
+- `GET /api/v1/admin/auth/session` — current admin session
+- `POST /api/v1/admin/auth/logout` — local logout plus refresh-token revocation when available
 
-```http
-GET /api/v1/me
-Authorization: Bearer <keycloak-token>
-```
+## Security model
 
-The response should include the local user, active condominium memberships, and onboarding status. This is how the app decides whether to show:
+- admin APIs require the authenticated server session and `SUPER_ADMIN`
+- browser-supplied role claims are ignored
+- CSRF protection applies to browser POSTs
+- the session cookie is `HttpOnly`, `Secure`, and `SameSite=Lax`
+- access/refresh tokens are kept server-side only
+- session expiry and token refresh happen on the server
 
-```text
-Start application
-Continue draft
-Application under review
-Open Síndico dashboard
-Accept resident invitation
-```
+## Keycloak
 
-An onboarding applicant is a Kaza application state, not a Keycloak role.
+The local realm export includes a confidential `kaza-admin-bff` client with:
 
-## Relevant API behavior
+- Authorization Code flow
+- PKCE `S256`
+- no implicit flow
+- no direct access grants
+- exact local redirect URI
+- brute-force protection enabled
 
-Unauthenticated requests receive `401 Unauthorized`. Authenticated users without the required role receive `403 Forbidden`. Webhook requests are not authenticated with Keycloak; they use the configured Asaas webhook token instead.
-
-Key configuration:
-
-```yaml
-KEYCLOAK_ISSUER_URI=http://localhost:8081/realms/kaza
-```
-
-## Local client configuration
-
-The repository declares the local Keycloak realm as code in:
-
-```text
-infra/keycloak/kaza-realm.json
-```
-
-Compose imports it automatically with:
-
-```yaml
-command: start-dev --import-realm
-```
-
-The imported `kaza-web` client is a public client configured for:
-
-- Authorization Code flow;
-- PKCE with `S256`;
-- no implicit flow;
-- no password/direct-access grant;
-- no client secret.
-
-The web or mobile application should redirect users to Keycloak's authorization endpoint, then exchange the authorization code using PKCE:
-
-```text
-GET /realms/kaza/protocol/openid-connect/auth
-  ?client_id=kaza-web
-  &response_type=code
-  &redirect_uri=http://localhost:5173/callback
-  &scope=openid profile email
-  &code_challenge=<base64url-sha256>
-  &code_challenge_method=S256
-```
-
-After the callback, the client exchanges the code at:
-
-```text
-POST /realms/kaza/protocol/openid-connect/token
-```
-
-with `grant_type=authorization_code`, the same `redirect_uri`, and the generated `code_verifier`. The client then sends the returned access token to Kaza.
+Production deployments should keep exact redirect URIs, HTTPS, and secret-managed client credentials.

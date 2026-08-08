@@ -11,5 +11,8 @@ The onboarding concept also has a clickable, dependency-free prototype at [`mock
 5. [Monthly owner billing](05-monthly-owner-billing.md)
 6. [Payment reconciliation](06-payment-reconciliation.md)
 7. [Long-term DDA and automatic supplier payments](07-long-term-dda-and-automatic-payments.md)
+8. [Public landing page contract](public-landing-contract.md)
 
 Provider setup and account constraints are documented in [the Asaas dossier](asaas-integration.md). The current implementation exposes provider boundaries even where the final Asaas Banking/Payables operation still needs to be enabled and verified.
+
+Local backend email testing uses Mailpit from `compose.yaml` (`http://localhost:8025` for the UI, SMTP on `localhost:1025`).

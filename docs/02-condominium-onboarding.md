@@ -31,13 +31,38 @@ Role: Síndico / Morador / Outro
 
 ```http
 POST /api/v1/onboarding/leads
+Content-Type: application/json
+
+{
+  "name": "Maria da Silva",
+  "email": "maria@example.com",
+  "phone": "+55 11 99999-9999",
+  "role": "SINDICO",
+  "contactConsent": true,
+  "marketingConsent": false,
+  "analyticsConsent": true,
+  "source": "web-landing",
+  "attribution": {
+    "landingPath": "/?utm_source=google",
+    "utmSource": "google",
+    "utmMedium": "cpc",
+    "utmCampaign": "microcondominios",
+    "referrer": "https://example.com/landing"
+  }
+}
 ```
 
+The public frontend keeps the form minimal, adds explicit consent for contact/marketing, and sends anonymous funnel events only with consent. The current request and analytics boundary is documented in [`public-landing-contract.md`](public-landing-contract.md).
+
 This creates an onboarding lead. The selected role is routing information, not authorization. A Morador is routed toward an invitation/access flow; a Síndico is routed toward condominium application; `Outro` can be handled manually.
+
+The endpoint validates and bounds every field and requires contact consent. Repeated submissions for the same normalized email are limited to one every 15 minutes. Attribution is stored only with analytics consent. A lead never creates a condominium, membership, or authorization grant.
 
 ## 2. Magic link and account setup
 
 Kaza sends a single-use, expiring email link. The link confirms email ownership and takes the applicant through Keycloak account setup. Keycloak owns password creation, login sessions, email verification, and optional MFA.
+
+The `SUPER_ADMIN` can trigger this invitation from the admin portal after reviewing a lead. The backend stores only a hash of the token, marks it single-use, and sends the link through the existing email outbox.
 
 The client then uses Authorization Code + PKCE with the `kaza-web` client. On the first authenticated request, Kaza provisions the local `users` record from the immutable Keycloak `sub`.
 
@@ -59,7 +84,7 @@ The application collects:
 - proposed subscription price;
 - initial unit and ideal-fraction data.
 
-CPF/CNPJ is validated for format, check digit, and duplicate use where applicable. A condominium may proceed without a CNPJ; provider eligibility is checked separately.
+CPF/CNPJ is validated for format and check digit when supplied. A condominium may proceed without a CNPJ; provider eligibility is checked separately.
 
 The application starts as:
 
@@ -114,6 +139,9 @@ The `SUPER_ADMIN` reviews:
 - uploaded evidence;
 - duplicate condominium risk;
 - unit and ideal-fraction data.
+
+The backend exposes protected review/list endpoints under `/api/v1/admin/onboarding/**`. Lead creation also queues two emails: an internal notification and a prospect confirmation. In local development they are captured by Mailpit.
+Those review endpoints are enforced in the backend with `SUPER_ADMIN` authorization; the frontend does not participate in the access decision.
 
 Possible decisions:
 
@@ -171,6 +199,56 @@ Authorization: Bearer <resident-keycloak-token>
 ```
 
 Kaza then links the Keycloak subject, creates the local `MORADOR` membership, and starts the occupant/service-account relationship.
+
+## Implemented applicant API behavior
+
+An application can optionally reference a lead. The lead email must then match the authenticated token email, and an applicant can have only one open application.
+
+Drafts are saved with:
+
+```http
+PATCH /api/v1/onboarding/applications/{id}
+Content-Type: application/json
+
+{
+  "responsibleName": "Maria da Silva",
+  "responsibleEmail": "maria@example.com",
+  "responsiblePhone": "+55 11 99999-9999",
+  "taxId": "52998224725",
+  "condominiumName": "Condomínio Flores",
+  "addressLine": "Rua das Flores, 10",
+  "addressCity": "São Paulo",
+  "addressState": "SP",
+  "postalCode": "01001000",
+  "proposedUnitCount": 2,
+  "subscriptionPricePerUnit": 7.00,
+  "units": [
+    {"identifier": "101", "idealFraction": 0.50000000},
+    {"identifier": "102", "idealFraction": 0.50000000}
+  ]
+}
+```
+
+Applicants can read or change only their own `DRAFT` or `NEEDS_MORE_INFORMATION` application. During review, status remains visible through `GET /api/v1/me`, but applicant detail and document operations are closed.
+
+The document API enforces ownership, at most 10 active documents, a 10 MB limit, PDF/JPEG/PNG allowlisting, content-signature checks, SHA-256 metadata, and deletion state. An `OnboardingDocumentStorage` boundary keeps bytes private; its initial adapter stores them in PostgreSQL and exposes no local path or public URL. Files remain `PENDING` until a production malware-scanner adapter is added.
+
+```http
+GET /api/v1/onboarding/applications/{id}/documents
+DELETE /api/v1/onboarding/applications/{id}/documents/{documentId}
+```
+
+Submission requires contact and address data, a positive subscription price, at least one supporting document, a unit count matching the unit draft, valid CPF/CNPJ check digits when supplied, unique unit identifiers, and ideal fractions totaling exactly `1.00000000`.
+
+Manual review and activation APIs are the next backend slice. The applicant slice persists the full state model but currently performs only the explicit `DRAFT`/`NEEDS_MORE_INFORMATION` → `UNDER_REVIEW` transition.
+
+## Production security requirements
+
+- Use HTTPS everywhere for the deployed auth and API stack.
+- Configure exact redirect URIs and web origins for the deployed client.
+- Keep `SUPER_ADMIN` accounts behind MFA and email verification.
+- Use strong admin passwords and rotate them through a secret manager, not env-file plaintext.
+- Keep brute-force protection enabled in Keycloak and avoid permissive CORS fallbacks.
 
 ## Why this design
 

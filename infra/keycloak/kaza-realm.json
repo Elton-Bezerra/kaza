@@ -2,6 +2,13 @@
   "realm": "kaza",
   "enabled": true,
   "registrationAllowed": false,
+  "sslRequired": "external",
+  "bruteForceProtected": true,
+  "failureFactor": 5,
+  "waitIncrementSeconds": 60,
+  "maxFailureWaitSeconds": 900,
+  "quickLoginCheckMilliSeconds": 1000,
+  "minimumQuickLoginWaitSeconds": 60,
   "roles": {
     "realm": [
       {
@@ -18,6 +25,17 @@
       }
     ]
   },
+  "users": [
+    {
+      "username": "super-admin",
+      "email": "super-admin@kaza.local",
+      "enabled": true,
+      "emailVerified": false,
+      "realmRoles": [
+        "SUPER_ADMIN"
+      ]
+    }
+  ],
   "clients": [
     {
       "clientId": "kaza-web",
@@ -35,6 +53,29 @@
       "redirectUris": [
         "http://localhost:3000/*",
         "http://localhost:5173/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3000",
+        "http://localhost:5173"
+      ]
+    },
+    {
+      "clientId": "kaza-admin-bff",
+      "name": "Kaza Admin BFF",
+      "enabled": true,
+      "publicClient": false,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "kaza-admin-bff-local-secret",
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "redirectUris": [
+        "http://localhost:3000/admin/auth/callback"
       ],
       "webOrigins": [
         "http://localhost:3000",
