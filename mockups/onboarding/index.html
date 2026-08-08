@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kaza onboarding mock-up</title>
+  <style>
+    :root {
+      --ink: #17221f;
+      --muted: #6f7d77;
+      --paper: #f7f8f4;
+      --card: #ffffff;
+      --green: #1c6b52;
+      --green-dark: #124936;
+      --mint: #dceee5;
+      --line: #dce4df;
+      --warning: #8a5a16;
+      --warning-bg: #fff3d8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font: 15px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .shell { min-height: 100vh; display: grid; grid-template-columns: 270px 1fr; }
+    aside { padding: 28px 22px; color: #eaf5f0; background: var(--green-dark); }
+    .brand { font-size: 25px; font-weight: 800; letter-spacing: -.04em; }
+    .tagline { margin: 8px 0 44px; color: #b8d6c9; font-size: 13px; }
+    .step { display: flex; gap: 10px; align-items: center; margin: 14px 0; color: #9ec5b5; }
+    .step.active { color: #fff; font-weight: 700; }
+    .step-number { width: 26px; height: 26px; display: grid; place-items: center; border: 1px solid currentColor; border-radius: 50%; font-size: 12px; }
+    main { padding: 30px clamp(22px, 5vw, 72px); }
+    .topbar { display: flex; justify-content: space-between; align-items: center; max-width: 920px; margin: 0 auto 34px; }
+    .eyebrow { color: var(--green); font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .user-pill { padding: 7px 12px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); background: var(--card); font-size: 13px; }
+    .content { max-width: 920px; margin: auto; }
+    h1 { max-width: 680px; margin: 0 0 12px; font-size: clamp(30px, 5vw, 50px); line-height: 1.03; letter-spacing: -.05em; }
+    h2 { margin: 0 0 8px; font-size: 25px; letter-spacing: -.03em; }
+    h3 { margin: 0 0 4px; font-size: 17px; }
+    p { color: var(--muted); }
+    .lead { max-width: 620px; margin: 0 0 26px; font-size: 17px; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 28px 0; }
+    .card { padding: 22px; border: 1px solid var(--line); border-radius: 16px; background: var(--card); box-shadow: 0 10px 30px #19382b08; }
+    .card p { margin: 7px 0 0; font-size: 13px; }
+    .panel { max-width: 720px; padding: 28px; border: 1px solid var(--line); border-radius: 18px; background: var(--card); box-shadow: 0 14px 34px #19382b0b; }
+    .field { margin: 16px 0; }
+    label { display: block; margin-bottom: 6px; color: var(--ink); font-size: 13px; font-weight: 700; }
+    input, select { width: 100%; padding: 12px 13px; border: 1px solid #cbd8d1; border-radius: 9px; color: var(--ink); background: #fff; outline: none; }
+    input:focus, select:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--mint); }
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .actions { display: flex; gap: 10px; align-items: center; margin-top: 24px; }
+    .button { padding: 11px 17px; border: 0; border-radius: 9px; color: #fff; background: var(--green); font-weight: 800; }
+    .button:hover { background: #155740; }
+    .button.secondary { color: var(--green-dark); background: var(--mint); }
+    .button.ghost { color: var(--green); background: transparent; border: 1px solid var(--line); }
+    .hint { margin: 0; font-size: 12px; }
+    .notice { display: flex; gap: 11px; margin: 20px 0; padding: 14px 16px; border-radius: 10px; color: var(--warning); background: var(--warning-bg); font-size: 13px; }
+    .status { display: inline-flex; padding: 5px 9px; border-radius: 999px; color: var(--green-dark); background: var(--mint); font-size: 12px; font-weight: 800; }
+    .timeline { margin: 25px 0; padding-left: 10px; border-left: 2px solid var(--mint); }
+    .timeline-item { position: relative; margin: 0 0 22px 17px; }
+    .timeline-item:before { content: ""; position: absolute; left: -27px; top: 4px; width: 9px; height: 9px; border: 3px solid var(--paper); border-radius: 50%; background: var(--green); }
+    .timeline-item p { margin: 2px 0 0; font-size: 13px; }
+    .metric { font-size: 30px; font-weight: 800; letter-spacing: -.04em; }
+    .hidden { display: none !important; }
+    footer { max-width: 920px; margin: 42px auto 0; color: var(--muted); font-size: 12px; }
+    @media (max-width: 760px) {
+      .shell { display: block; }
+      aside { padding: 18px 20px; }
+      .tagline { margin-bottom: 18px; }
+      .steps { display: flex; gap: 12px; overflow: auto; }
+      .step { flex: 0 0 auto; margin: 0; }
+      .step span:last-child { display: none; }
+      main { padding: 24px 18px; }
+      .grid, .two { grid-template-columns: 1fr; }
+      .panel { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside>
+      <div class="brand">kaza</div>
+      <div class="tagline">Gestão simples para microcondomínios.</div>
+      <div class="steps">
+        <div class="step active" data-step="1"><span class="step-number">1</span><span>Conhecer a Kaza</span></div>
+        <div class="step" data-step="2"><span class="step-number">2</span><span>Criar acesso</span></div>
+        <div class="step" data-step="3"><span class="step-number">3</span><span>Dados do condomínio</span></div>
+        <div class="step" data-step="4"><span class="step-number">4</span><span>Documentos</span></div>
+        <div class="step" data-step="5"><span class="step-number">5</span><span>Análise</span></div>
+        <div class="step" data-step="6"><span class="step-number">6</span><span>Ativo</span></div>
+      </div>
+    </aside>
+    <main>
+      <div class="topbar">
+        <div class="eyebrow">Onboarding do Síndico</div>
+        <div class="user-pill" id="user-pill">Visitante</div>
+      </div>
+      <div class="content">
+        <section id="screen-landing">
+          <h1>Mais clareza para cuidar do seu condomínio.</h1>
+          <p class="lead">A Kaza ajuda o Síndico a organizar unidades, frações ideais, despesas e cobranças sem exigir um app do morador.</p>
+          <div class="grid">
+            <div class="card"><h3>Você mantém o controle</h3><p>O condomínio só fica ativo depois da sua revisão e aprovação.</p></div>
+            <div class="card"><h3>Fração ideal correta</h3><p>As cobranças mensais são calculadas com base no cadastro das unidades.</p></div>
+            <div class="card"><h3>Um acesso seguro</h3><p>Login, MFA e recuperação de acesso ficam com o Keycloak.</p></div>
+          </div>
+          <div class="actions">
+            <button class="button" data-go="signin">Começar onboarding</button>
+            <button class="button ghost" data-go="signin">Já tenho uma conta</button>
+          </div>
+        </section>
+
+        <section id="screen-signin" class="hidden">
+          <div class="panel">
+            <span class="status">Keycloak · Authorization Code + PKCE</span>
+            <h2 style="margin-top:16px">Primeiro, vamos identificar você</h2>
+            <p>Você será redirecionado para o Keycloak. A Kaza não recebe nem armazena sua senha.</p>
+            <div class="notice"><strong>O que acontece:</strong> depois do login, a Kaza cria seu usuário local e verifica se você tem uma aplicação ou condomínio ativo.</div>
+            <div class="actions">
+              <button class="button" data-go="application">Simular login com Keycloak</button>
+              <button class="button ghost" data-go="landing">Voltar</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="screen-application" class="hidden">
+          <div class="panel">
+            <span class="status">Rascunho salvo</span>
+            <h2 style="margin-top:16px">Conte-nos sobre o condomínio</h2>
+            <p>Esses dados iniciam uma aplicação. O condomínio só será ativado depois da análise.</p>
+            <div class="two">
+              <div class="field"><label for="condo-name">Nome do condomínio</label><input id="condo-name" value="Residencial das Flores"></div>
+              <div class="field"><label for="tax-id">CPF ou CNPJ do responsável</label><input id="tax-id" value="123.456.789-00"></div>
+            </div>
+            <div class="two">
+              <div class="field"><label for="city">Cidade</label><input id="city" value="São Paulo"></div>
+              <div class="field"><label for="units">Quantidade de unidades</label><input id="units" type="number" value="8"></div>
+            </div>
+            <div class="field"><label for="email">E-mail de contato</label><input id="email" type="email" value="sindico@example.com"></div>
+            <div class="actions">
+              <button class="button secondary" data-go="draft">Salvar rascunho</button>
+              <button class="button" data-go="documents">Continuar para documentos</button>
+            </div>
+            <p class="hint">Você poderá informar unidades, ocupantes e frações ideais na próxima etapa.</p>
+          </div>
+        </section>
+
+        <section id="screen-documents" class="hidden">
+          <div class="panel">
+            <span class="status">Evidências da aplicação</span>
+            <h2 style="margin-top:16px">Mostre sua relação com o prédio</h2>
+            <p>Esses documentos ajudam a Kaza confirmar que você pode administrar este condomínio. Eles ficam privados e só são vistos pela equipe de análise.</p>
+            <div class="field">
+              <label for="document-type">Tipo de documento</label>
+              <select id="document-type">
+                <option>Ata de eleição ou nomeação</option>
+                <option>Autorização assinada pelos proprietários</option>
+                <option>Convenção ou documento do condomínio</option>
+                <option>Contrato de administração</option>
+                <option>Outro documento</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="document-file">Arquivo</label>
+              <input id="document-file" type="file" accept=".pdf,.jpg,.jpeg,.png">
+            </div>
+            <div class="notice"><strong>Condomínio informal?</strong> Você pode enviar uma declaração assinada ou escolher confirmação manual por telefone.</div>
+            <div class="actions">
+              <button class="button secondary" data-go="application">Voltar</button>
+              <button class="button" data-go="review">Enviar aplicação</button>
+            </div>
+            <p class="hint">Mock-up: nenhum arquivo é enviado de verdade.</p>
+          </div>
+        </section>
+
+        <section id="screen-draft" class="hidden">
+          <div class="panel">
+            <span class="status">DRAFT</span>
+            <h2 style="margin-top:16px">Seu rascunho está salvo</h2>
+            <p>Você pode sair agora e continuar depois. Nenhum acesso administrativo foi concedido ainda.</p>
+            <div class="timeline">
+              <div class="timeline-item"><h3>Conta criada</h3><p>Seu login está protegido pelo Keycloak.</p></div>
+              <div class="timeline-item"><h3>Aplicação iniciada</h3><p>Os dados básicos do condomínio foram salvos.</p></div>
+              <div class="timeline-item"><h3>Próximo passo</h3><p>Complete as unidades e envie para análise.</p></div>
+            </div>
+            <button class="button" data-go="application">Continuar aplicação</button>
+          </div>
+        </section>
+
+        <section id="screen-review" class="hidden">
+          <div class="panel">
+            <span class="status">UNDER_REVIEW</span>
+            <h2 style="margin-top:16px">Aplicação enviada</h2>
+            <p>A equipe Kaza vai validar os dados do responsável, a existência do condomínio e as informações das unidades.</p>
+            <div class="notice"><strong>Por que existe análise?</strong> Criar uma aplicação é livre; ativar um condomínio e conceder poderes de Síndico exige validação.</div>
+            <div class="timeline">
+              <div class="timeline-item"><h3>Dados recebidos</h3><p>CPF/CNPJ, contato e estrutura inicial.</p></div>
+              <div class="timeline-item"><h3>Verificação</h3><p>Conferência de identidade e documentos, quando necessário.</p></div>
+              <div class="timeline-item"><h3>Ativação</h3><p>Após aprovação, o condomínio poderá ser configurado e conectado ao provedor financeiro.</p></div>
+            </div>
+            <button class="button" data-go="approved">Simular aprovação</button>
+          </div>
+        </section>
+
+        <section id="screen-approved" class="hidden">
+          <span class="status">ACTIVE · SINDICO</span>
+          <h1 style="margin-top:16px">Bem-vindo ao seu condomínio.</h1>
+          <p class="lead">O condomínio foi aprovado. Agora você pode completar unidades, convidar ocupantes, registrar despesas e iniciar o fechamento mensal.</p>
+          <div class="grid">
+            <div class="card"><div class="metric">8</div><p>Unidades cadastradas</p></div>
+            <div class="card"><div class="metric">0</div><p>Ocupantes convidados</p></div>
+            <div class="card"><div class="metric">R$ 10</div><p>Preço por unidade</p></div>
+          </div>
+          <div class="notice"><strong>KazaConta pendente:</strong> o próximo passo é concluir a configuração financeira do condomínio antes de emitir cobranças.</div>
+          <div class="panel">
+            <h2>Próximas ações</h2>
+            <div class="timeline">
+              <div class="timeline-item"><h3>Configurar KazaConta</h3><p>Conclua a configuração financeira e confirme a conta do condomínio.</p></div>
+              <div class="timeline-item"><h3>Revisar frações ideais</h3><p>A soma precisa ser exatamente 1.00000000.</p></div>
+              <div class="timeline-item"><h3>Convidar ocupantes</h3><p>O morador cria seu próprio acesso e recebe a associação à unidade.</p></div>
+              <div class="timeline-item"><h3>Configurar cobrança</h3><p>Escolha o preço por unidade e os métodos de pagamento de cada ocupante.</p></div>
+            </div>
+          </div>
+        </section>
+      </div>
+      <footer>Mock-up local · dados fictícios · nenhuma chamada real é feita.</footer>
+    </main>
+  </div>
+  <script>
+    const screens = ["landing", "signin", "application", "documents", "draft", "review", "approved"];
+    const steps = { landing: 1, signin: 2, application: 3, documents: 4, draft: 3, review: 5, approved: 6 };
+    function show(name) {
+      screens.forEach(screen => document.getElementById(`screen-${screen}`).classList.toggle("hidden", screen !== name));
+      document.querySelectorAll(".step").forEach(step => step.classList.toggle("active", Number(step.dataset.step) <= steps[name]));
+      document.getElementById("user-pill").textContent = name === "landing" || name === "signin" ? "Visitante" : "sindico@example.com";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    document.querySelectorAll("[data-go]").forEach(button => button.addEventListener("click", () => show(button.dataset.go)));
+  </script>
+</body>
+</html>
